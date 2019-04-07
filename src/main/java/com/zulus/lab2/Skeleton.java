@@ -5,9 +5,6 @@ import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.geom.GeneralPath;
-import java.util.Arrays;
-import java.util.stream.Collectors;
-import java.util.List;
 
 @SuppressWarnings("serial")
 public class Skeleton extends JPanel implements ActionListener {
@@ -20,20 +17,13 @@ public class Skeleton extends JPanel implements ActionListener {
     private double transparencyStep = 0.01;
     private int transparencyDirection = 1;
     private Timer timer;
-    private double[][] bigPolygonCoords = {{0, 0.1}, {0.1, 0.5}, {0, 0.9}, {0.4, 0.5}};
-    private double[][] smallPolygonCoords = {{1, 0.4}, {0.85, 0.5}, {1, 0.6}, {0.95, 0.5}};
-    private double[] circleCenter = {0.25, 0.5};
-    private double circleWidth = 0.15;
-    private double circleHeigth = 0.15;
-    private double[][] stringCenters = {{0.23, 0.5}, {0.93, 0.5}};
+    private int[][] bigPolygonCoords = {{-180, -150}, {-20, 0}, {-180, 150}, {-140, 0}};
+    private int[][] smallPolygonCoords = {{150, -50}, {50, 0}, {150, 50}, {120, 0}};
+    private int[] circleCenter = {-90, 0};
+    private int[][] stringCenters = {{-90, 0}, {100, 0}};
+    private int circleRadius = 60;
     private int stringsCount = 7;
     private double stringSpace = 0.01;
-    private double dax0;
-    private double dax1;
-    private double day0;
-    private double day1;
-    private double daw;
-    private double dah;
 
     public Skeleton() {
         timer = new Timer(10, this);
@@ -54,9 +44,9 @@ public class Skeleton extends JPanel implements ActionListener {
         maxHeight = size.height - insets.top - insets.bottom - 1;
     }
 
-    private GeneralPath createPolygon(List<double[]> points) {
+    private GeneralPath createPolygon(int[][] points) {
         GeneralPath poly = new GeneralPath();
-        poly.moveTo(points.get(0)[0], points.get(0)[1]);
+        poly.moveTo(points[0][0], points[0][1]);
         for (var point : points) {
             poly.lineTo(point[0], point[1]);
         }
@@ -64,46 +54,38 @@ public class Skeleton extends JPanel implements ActionListener {
         return poly;
     }
 
-    List<double[]> processPolyCoords(double[][] initialCoords) {
-        return Arrays
-                .stream(initialCoords)
-                .map((coords) -> new double[]{
-                        dax0 + daw * coords[0],
-                        day0 + dah * coords[1],
-
-                })
-                .collect(Collectors.toList());
-    }
-
-
     private void drawGuitar(Graphics2D g2d) {
         GradientPaint gp = new GradientPaint(
                 0, 0, new Color(255, 50, 0, (int) (transparency * 255)),
-                (int) (50 * scale), (int) (50 * scale), new Color(0, 0, 255, (int) (transparency * 255)),
+                50, 50, new Color(0, 0, 255, (int) (transparency * 255)),
                 true);
         g2d.setPaint(gp);
-        var smallScaledPolyCoors = processPolyCoords(this.smallPolygonCoords);
-        var bigScaledPolyCoors = processPolyCoords(this.bigPolygonCoords);
-        g2d.fill(createPolygon(smallScaledPolyCoors));
-        g2d.fill(createPolygon(bigScaledPolyCoors));
+        // big polygon
+        g2d.translate(maxWidth / 2, maxHeight / 2);
+        g2d.scale(scale, scale);
+        g2d.fill(createPolygon(bigPolygonCoords));
+        // small polygon
+        g2d.setColor(new Color(0, 0, 255, (int) (255 * this.transparency)));
+        g2d.fill(createPolygon(smallPolygonCoords));
+        // circle
         g2d.setColor(new Color(255, 0, 0, (int) (255 * this.transparency)));
-        g2d.fillOval(
-                (int) (dax0 + daw * circleCenter[0] - (circleWidth * daw) / 2),
-                (int) (day0 + dah * circleCenter[1] - (circleHeigth * dah) / 2),
-                (int) (circleWidth * daw),
-                (int) (circleHeigth * dah)
-        );
+        g2d.fillOval(circleCenter[0] - circleRadius / 2, circleCenter[1] - circleRadius / 2, circleRadius, circleRadius);
+        // lines
         g2d.setColor(new Color(0, 0, 0, (int) (255 * this.transparency)));
-        int stringsStartX = (int) (dax0 + daw * this.stringCenters[0][0]);
-        int stringsStartY = (int) (day0 + dah * this.stringCenters[0][1] - dah * stringSpace * stringsCount / 2);
-        int stringsEndX = (int) (dax0 + daw * this.stringCenters[1][0]);
-        int stringsEndY = (int) (day0 + dah * this.stringCenters[1][1] - dah * stringSpace * stringsCount / 2);
+        int stringsStartX = stringCenters[0][0];
+        int stringsStartY = (int) (this.stringCenters[0][1] - maxWidth * stringSpace * stringsCount / 2);
+        int stringsEndX = this.stringCenters[1][0];
+        int stringsEndY = (int) (this.stringCenters[1][1] - maxWidth * stringSpace * stringsCount / 2);
+        BasicStroke basicStroke = new BasicStroke(1, BasicStroke.CAP_ROUND, BasicStroke.JOIN_MITER);
+        g2d.setStroke(basicStroke);
         for (int i = 0; i < this.stringsCount; i++) {
-            g2d.drawLine(stringsStartX, (int) (stringsStartY + dah * stringSpace * i), stringsEndX, (int) (stringsEndY + dah * stringSpace * i));
+            g2d.drawLine(stringsStartX, (int) (stringsStartY + maxHeight * stringSpace * i), stringsEndX, (int) (stringsEndY + maxHeight * stringSpace * i));
         }
     }
 
     private void drawBorder(Graphics2D g2d) {
+        BasicStroke basicStroke = new BasicStroke(5, BasicStroke.CAP_ROUND, BasicStroke.JOIN_MITER);
+        g2d.setStroke(basicStroke);
         g2d.drawRect(5, 5, maxWidth - 10, maxHeight - 10);
     }
 
@@ -117,15 +99,6 @@ public class Skeleton extends JPanel implements ActionListener {
         g2d.clearRect(0, 0, maxWidth, maxHeight);
         this.drawBorder(g2d);
         this.drawGuitar(g2d);
-    }
-
-    private void recalculateDrawArea() {
-        dax0 = 20 + maxHeight / 2 * (1 - scale);
-        dax1 = maxWidth - dax0;
-        day0 = 20 + maxHeight / 2 * (1 - scale);
-        day1 = maxHeight - day0;
-        daw = dax1 - dax0;
-        dah = day1 - day0;
     }
 
     @Override
@@ -148,7 +121,6 @@ public class Skeleton extends JPanel implements ActionListener {
             this.scale = 0.2;
             this.scaleDirection = 1;
         }
-        recalculateDrawArea();
 
         repaint();
     }

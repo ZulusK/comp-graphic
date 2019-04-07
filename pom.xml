@@ -35,15 +35,24 @@
                 <version>1.6.0</version>
                 <executions>
                     <execution>
+                        <id>lab1</id>
                         <goals>
                             <goal>java</goal>
                         </goals>
+                        <configuration>
+                            <mainClass>com.zulus.lab1.Main</mainClass>
+                        </configuration>
+                    </execution>
+                    <execution>
+                        <id>lab2</id>
+                        <goals>
+                            <goal>java</goal>
+                        </goals>
+                        <configuration>
+                            <mainClass>com.zulus.lab2.Main</mainClass>
+                        </configuration>
                     </execution>
                 </executions>
-                <configuration>
-                    <executable>java</executable>
-                    <mainClass>com.zulus.Main</mainClass>
-                </configuration>
             </plugin>
         </plugins>
     </build>

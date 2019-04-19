@@ -52,6 +52,15 @@
                             <mainClass>com.zulus.lab2.Skeleton</mainClass>
                         </configuration>
                     </execution>
+                    <execution>
+                        <id>lab3</id>
+                        <goals>
+                            <goal>java</goal>
+                        </goals>
+                        <configuration>
+                            <mainClass>com.zulus.lab3.Main</mainClass>
+                        </configuration>
+                    </execution>
                 </executions>
             </plugin>
         </plugins>
